@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0e1013">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Macros">
+<title>Macros</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230e1013'/%3E%3Cpath d='M52 14c7 15 22 23 22 42a24 24 0 0 1-48 0c0-11 6-18 11-24 2 9 6 12 10 12-3-11 0-20 5-30z' fill='%23ff7a2f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1013; --card:#161a1f; --card2:#1e232a; --line:#2a3039;
+  --text:#eef1f5; --muted:#8d96a5;
+  --p:#ff6b5a; --c:#f5b942; --g:#37c9ad;
+  --accent:#ff7a2f; --ok:#4ade80; --warn:#fbbf24; --bad:#ef4444;
+  --num:'Barlow Condensed', system-ui, sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font:15px/1.4 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:calc(28px + env(safe-area-inset-bottom))}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation}
+input{font:inherit;font-size:16px;color:var(--text)}
+.wrap{max-width:480px;margin:0 auto;padding:0 16px}
+
+/* Barra superior */
+.top{position:sticky;top:0;z-index:5;background:rgba(14,16,19,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:62px}
+.date{font-weight:700;font-size:17px}
+.date::first-letter{text-transform:uppercase}
+.sync{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:2px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.dot.ok{background:var(--ok)}
+.dot.pending,.dot.sync{background:var(--warn)}
+.dot.error{background:var(--bad)}
+.icon-btn{width:44px;height:44px;border-radius:12px;background:var(--card2);border:1px solid var(--line);font-size:19px;display:grid;place-items:center}
+
+main{padding-top:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+h2{margin:0;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.card>h2{margin-bottom:12px}
+.hint{font-size:13px;color:var(--muted);margin:10px 0 0}
+.link{color:var(--muted);font-size:13px;padding:6px 4px}
+.link:active{color:var(--text)}
+
+/* Selector de perfil */
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.seg-b{background:var(--card2);border:1.5px solid var(--line);border-radius:12px;padding:10px 2px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:58px}
+.seg-n{font-weight:600;font-size:13px}
+.seg-m{font-family:var(--num);font-size:13px;color:var(--muted);letter-spacing:.02em}
+[data-p=entrenamiento]{--pc:#ff7a2f}
+[data-p=rutina]{--pc:#a78bfa}
+[data-p=descanso]{--pc:#60a5fa}
+[data-p=emergencia]{--pc:#ef4444}
+.seg-b.on{border-color:var(--pc);background:color-mix(in srgb,var(--pc) 20%,var(--card2))}
+.seg-b.on .seg-m{color:var(--text)}
+.badge{font-size:12px;font-weight:600;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card2);color:var(--muted)}
+.badge.on{color:#c7d2fe;border-color:#6366f1;background:color-mix(in srgb,#6366f1 22%,var(--card2))}
+
+/* Resumen de macros */
+.hero{padding-top:18px}
+.kcal{display:flex;align-items:baseline;gap:8px}
+.big{font-family:var(--num);font-size:60px;font-weight:700;line-height:.9;letter-spacing:-.01em}
+.unit{color:var(--muted);font-size:14px}
+.over .big{color:var(--warn)}
+.kcal-sub{color:var(--muted);font-size:13px;margin:6px 0 14px}
+.bar-row{--mc:var(--p);margin-top:12px}
+.bar-row.c{--mc:var(--c)} .bar-row.g{--mc:var(--g)}
+.bar-top{display:flex;justify-content:space-between;align-items:baseline;font-size:14px}
+.bar-l{font-weight:600;color:var(--mc)}
+.bar-v{font-family:var(--num);font-size:19px;color:var(--muted)}
+.bar-v b{color:var(--text);font-weight:700}
+.bar{height:10px;border-radius:99px;background:#262b33;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--mc);border-radius:99px;transition:width .35s ease}
+.bar-row.excess .bar i{background:repeating-linear-gradient(45deg,var(--mc),var(--mc) 6px,color-mix(in srgb,var(--mc) 60%,#000) 6px,color-mix(in srgb,var(--mc) 60%,#000) 12px)}
+.bar-f{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* Registro */
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card2);font-size:14px;color:var(--muted)}
+.chip.on{color:var(--bg);background:var(--text);border-color:var(--text);font-weight:600}
+.q-row{--mc:var(--p);display:grid;grid-template-columns:30px repeat(3,1fr);gap:8px;align-items:center;margin-bottom:8px}
+.q-row.c{--mc:var(--c)} .q-row.g{--mc:var(--g)}
+.q-l{font-family:var(--num);font-size:22px;font-weight:700;color:var(--mc);text-align:center}
+.q-b{height:52px;border-radius:14px;font-family:var(--num);font-size:22px;font-weight:700;color:var(--mc);background:color-mix(in srgb,var(--mc) 14%,var(--card2));border:1px solid color-mix(in srgb,var(--mc) 35%,transparent);transition:transform .08s}
+.q-b:active,.pre:active,.seg-b:active,.stp:active,.en-b:active{transform:scale(.95)}
+.tabs{display:flex;gap:4px;background:var(--card2);border-radius:12px;padding:4px;margin:14px 0 10px}
+.tab{flex:1;padding:8px 0;border-radius:9px;font-size:13px;font-weight:600;color:var(--muted)}
+.tab.on{background:var(--card);color:var(--text);box-shadow:0 1px 0 rgba(255,255,255,.04)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pre{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:86px;text-align:center;transition:transform .08s}
+.pre-e{font-size:22px;line-height:1}
+.pre-n{font-size:12.5px;font-weight:600;line-height:1.2}
+.pre-m{font-family:var(--num);font-size:13px;color:var(--muted)}
+details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;color:var(--muted);font-size:14px;font-weight:600;list-style:none;padding:4px 0}
+summary::-webkit-details-marker{display:none}
+summary::before{content:'＋ ';color:var(--muted)}
+details[open] summary::before{content:'－ '}
+.manual{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.manual input,.fld input{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;outline:none}
+.manual input:focus,.fld input:focus{border-color:var(--accent)}
+.manual .full{grid-column:1/-1}
+.btn{height:48px;border-radius:14px;background:var(--accent);color:#1a0d04;font-weight:700;width:100%}
+.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.log{list-style:none;margin:8px 0 0;padding:0}
+.log li{display:grid;grid-template-columns:44px 1fr auto 34px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.log li:last-child{border-bottom:0}
+.log .lt{font-family:var(--num);color:var(--muted);font-size:15px}
+.log small{display:block;color:var(--muted);font-size:11.5px}
+.log .lm{font-family:var(--num);font-size:15px;color:var(--muted);white-space:nowrap}
+.log .del{width:34px;height:34px;border-radius:10px;color:var(--muted)}
+.empty{color:var(--muted);font-size:13px;padding:8px 0}
+
+/* Check-in */
+.ci{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.ci:last-child{border-bottom:0;padding-bottom:0}
+.ci:first-of-type{padding-top:0}
+.ci-l{font-weight:600}
+.ci-l small{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:2px}
+.stepper{display:flex;align-items:center;gap:6px}
+.stp{width:44px;height:44px;border-radius:12px;background:var(--card2);border:1px solid var(--line);font-size:20px;font-weight:600;transition:transform .08s}
+.val{font-family:var(--num);font-size:24px;font-weight:700;min-width:64px;text-align:center}
+.peso-in{width:84px;text-align:center;font-family:var(--num);font-size:24px;font-weight:700;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:6px 4px;outline:none}
+.peso-in:focus{border-color:var(--accent)}
+.water{flex:1}
+.water .bar{margin-top:8px}
+.water .bar i{background:#38bdf8}
+.wbtns{display:flex;gap:6px;margin-top:10px}
+.wbtns button{flex:1;height:42px;border-radius:12px;background:var(--card2);border:1px solid var(--line);font-family:var(--num);font-size:18px;font-weight:700}
+.en{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+.en-b{height:52px;border-radius:12px;background:var(--card2);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;transition:transform .08s}
+.en-b small{font-family:var(--num);font-size:13px;color:var(--muted)}
+.en-b.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--card2))}
+
+/* Ajustes */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:20}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--card);border-top:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));max-width:480px;margin:0 auto;max-height:90vh;overflow:auto}
+.fld{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-top:14px}
+.fld input{margin-top:6px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
+[hidden]{display:none!important}
+
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:all .2s;z-index:30;max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:360px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .big{font-size:52px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div>
+      <div class="date" id="hoyFecha">—</div>
+      <div class="sync"><span class="dot" id="syncDot"></span><span id="syncTxt">Solo en este teléfono</span></div>
+    </div>
+    <button class="icon-btn" id="btnAjustes" aria-label="Ajustes">⚙︎</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="card">
+    <div class="card-h">
+      <h2>Perfil de hoy</h2>
+      <button class="badge" id="btnGuardiaHoy">🌙 Guardia</button>
+    </div>
+    <div class="seg" id="segHoy"></div>
+  </section>
+
+  <section class="card hero" id="hero">
+    <div class="kcal"><span class="big" id="kcalRest">0</span><span class="unit" id="kcalLbl">kcal restantes</span></div>
+    <div class="kcal-sub" id="kcalSub"></div>
+    <div id="bars"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-h">
+      <h2>Registrar</h2>
+      <button class="link" id="btnUndo">↶ Deshacer</button>
+    </div>
+    <div class="chips" id="meals"></div>
+    <div id="quick"></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="grid" id="presets"></div>
+    <p class="hint" id="presetHint" hidden>El alcohol se registra como carbos: kcal ÷ 4. Así cuadra con tu meta sin tocar la proteína.</p>
+
+    <details>
+      <summary>Ingreso manual</summary>
+      <div class="manual">
+        <input id="mP" type="number" inputmode="decimal" placeholder="P (g)" min="0">
+        <input id="mC" type="number" inputmode="decimal" placeholder="C (g)" min="0">
+        <input id="mG" type="number" inputmode="decimal" placeholder="G (g)" min="0">
+        <input id="mN" class="full" type="text" placeholder="Nombre (opcional)" maxlength="40">
+        <button class="btn full" id="btnManual">Sumar</button>
+      </div>
+    </details>
+
+    <details id="logBox">
+      <summary>Registro de hoy (<span id="logCount">0</span>)</summary>
+      <ul class="log" id="logList"></ul>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>Check-in diario</h2>
+
+    <div class="ci">
+      <div class="ci-l">Peso <small id="pesoAvg">Promedio 7 días: —</small></div>
+      <div class="stepper">
+        <button class="stp" data-peso="-0.1" aria-label="Bajar peso">−</button>
+        <input class="peso-in" id="peso" type="number" inputmode="decimal" step="0.1" aria-label="Peso en kg">
+        <button class="stp" data-peso="0.1" aria-label="Subir peso">+</button>
+      </div>
+    </div>
+
+    <div class="ci">
+      <div class="ci-l">Sueño <small>horas anoche</small></div>
+      <div class="stepper">
+        <button class="stp" data-sueno="-0.5" aria-label="Menos sueño">−</button>
+        <span class="val" id="sueno">—</span>
+        <button class="stp" data-sueno="0.5" aria-label="Más sueño">+</button>
+      </div>
+    </div>
+
+    <div class="ci" style="display:block">
+      <div class="water">
+        <div class="bar-top"><span class="ci-l">Agua</span><span class="bar-v" id="aguaTxt"></span></div>
+        <div class="bar"><i id="aguaBar"></i></div>
+        <div class="wbtns">
+          <button data-agua="-0.25">−0,25</button>
+          <button data-agua="0.25">+0,25 L</button>
+          <button data-agua="0.5">+0,5 L</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ci" style="display:block">
+      <div class="ci-l">Energía</div>
+      <div class="en" id="energia"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-h">
+      <h2>Plan de mañana</h2>
+      <button class="badge" id="btnGuardiaMan">🌙 Guardia</button>
+    </div>
+    <div class="seg" id="segMan"></div>
+    <p class="hint" id="manHint"></p>
+  </section>
+
+</main>
+
+<div class="overlay" id="overlay" hidden></div>
+<section class="sheet" id="sheet" hidden aria-label="Ajustes">
+  <div class="card-h"><h2>Ajustes</h2><button class="icon-btn" id="btnCerrar" aria-label="Cerrar">✕</button></div>
+  <label class="fld">URL del Worker
+    <input id="fWorker" type="url" placeholder="https://macros-notion.tu-sub.workers.dev" autocomplete="off" autocapitalize="off">
+  </label>
+  <label class="fld">Clave de la app
+    <input id="fKey" type="password" autocomplete="off">
+  </label>
+  <label class="fld">Primera noche de un bloque de guardias
+    <input id="fGuard" type="date">
+  </label>
+  <p class="hint">Calcula bloques de 14 noches de guardia y 14 libres. Si un día cambia por reemplazo, tócalo con el botón 🌙.</p>
+  <div class="row2">
+    <button class="btn ghost" id="btnTest">Probar conexión</button>
+    <button class="btn" id="btnGuardar">Guardar</button>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+
+/* ================= Configuración nutricional ================= */
+const PERFILES = {
+  entrenamiento: { nombre: 'Entrenamiento', corto: 'Entreno',  p: 145, c: 245, g: 60, agua: 3.5 },
+  rutina:        { nombre: 'Rutina corta',  corto: 'Rutina',   p: 145, c: 220, g: 60, agua: 3.3 },
+  descanso:      { nombre: 'Descanso',      corto: 'Descanso', p: 145, c: 145, g: 65, agua: 2.8 },
+  emergencia:    { nombre: 'Emergencia',    corto: 'Emerg.',   p: 160, c: 255, g: 60, agua: 3.8 },
+};
+const NOMBRE_A_KEY = Object.fromEntries(Object.entries(PERFILES).map(([k, v]) => [v.nombre, k]));
+
+const MACROS = [
+  { k: 'p', label: 'Proteína', steps: [5, 10, 25] },
+  { k: 'c', label: 'Carbos',   steps: [10, 25, 50] },
+  { k: 'g', label: 'Grasas',   steps: [5, 10, 15] },
+];
+
+const COMIDAS = ['Desayuno', 'Almuerzo', 'Once', 'Cena', 'Guardia', 'Snack'];
+
+const PRESETS = {
+  'Básicos': [
+    { n: 'Whey 1 medida', e: '🥤', p: 25, c: 1,   g: 0.5 },
+    { n: 'Pollo 100 g',   e: '🍗', p: 30, c: 0,   g: 4 },
+    { n: 'Atún lata',     e: '🐟', p: 25, c: 0,   g: 1 },
+    { n: 'Huevo',         e: '🥚', p: 6,  c: 0.5, g: 5 },
+    { n: 'Arroz 100 g',   e: '🍚', p: 3,  c: 28,  g: 0 },
+    { n: 'Marraqueta',    e: '🥖', p: 8,  c: 55,  g: 1 },
+    { n: 'Avena 40 g',    e: '🥣', p: 5,  c: 26,  g: 3 },
+    { n: 'Plátano',       e: '🍌', p: 1,  c: 27,  g: 0 },
+    { n: 'Palta 50 g',    e: '🥑', p: 1,  c: 4,   g: 7 },
+    { n: 'Aceite 1 cda',  e: '🫒', p: 0,  c: 0,   g: 14 },
+  ],
+  'Delivery': [
+    { n: 'Pizza trozo',       e: '🍕', p: 12, c: 34, g: 11 },
+    { n: 'Pizza carnes',      e: '🍕', p: 14, c: 34, g: 15 },
+    { n: 'Gohan ajustado',    e: '🍱', p: 40, c: 50, g: 18 },
+    { n: 'Gohan típico',      e: '🍱', p: 30, c: 85, g: 30 },
+    { n: 'Roll 10 piezas',    e: '🍣', p: 15, c: 60, g: 13 },
+    { n: 'Hot roll 10 pzs',   e: '🍤', p: 15, c: 80, g: 30 },
+    { n: 'Nigiri',            e: '🍣', p: 3,  c: 7,  g: 1 },
+    { n: 'Burger cadena',     e: '🍔', p: 26, c: 45, g: 30 },
+    { n: 'Burger artesanal',  e: '🍔', p: 45, c: 50, g: 50 },
+    { n: 'Papas medianas',    e: '🍟', p: 4,  c: 45, g: 17 },
+  ],
+  'Alcohol': [
+    { n: 'Cerveza lata',    e: '🍺', p: 0, c: 36, g: 0 },
+    { n: 'Trago + zero',    e: '🥃', p: 0, c: 25, g: 0 },
+    { n: 'Trago + bebida',  e: '🥃', p: 0, c: 46, g: 0 },
+    { n: 'Bebida 500 ml',   e: '🥤', p: 0, c: 53, g: 0 },
+  ],
+};
+
+const ENERGIA = [['😵', 1], ['😮‍💨', 2], ['😐', 3], ['🙂', 4], ['⚡', 5]];
+
+/* ================= Utilidades ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+const r1 = n => Math.round(n * 10) / 10;
+const r2 = n => Math.round(n * 100) / 100;
+const fmt = (n, d = 0) => (n == null || isNaN(n)) ? '—' : Number(n).toLocaleString('es-CL', { maximumFractionDigits: d });
+const buzz = () => { try { navigator.vibrate && navigator.vibrate(8); } catch (e) {} };
+
+const store = {
+  get(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ================= Fechas ================= */
+// El "día" cambia a las 04:00: lo que comes a las 00:30 cuenta para el día anterior.
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d, 12); };
+const addDays = (s, n) => { const d = parseYmd(s); d.setDate(d.getDate() + n); return ymd(d); };
+const logicalDate = () => ymd(new Date(Date.now() - 4 * 3600e3));
+const fechaLarga = s => parseYmd(s).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'short' });
+
+/* ================= Estado ================= */
+let cfg = Object.assign({ workerUrl: '', appKey: '', guardStart: '' }, store.get('nut:cfg'));
+const configured = () => !!(cfg.workerUrl && cfg.appKey);
+
+function isGuardNight(date) {
+  if (!cfg.guardStart) return false;
+  const diff = Math.round((parseYmd(date) - parseYmd(cfg.guardStart)) / 864e5);
+  return ((diff % 28) + 28) % 28 < 14;
+}
+
+const blankDay = date => ({ date, perfil: null, guardia: null, p: 0, c: 0, g: 0, peso: null, sueno: null, agua: 0, energia: null, log: [] });
+const loadDay = date => Object.assign(blankDay(date), store.get('nut:day:' + date));
+const saveDay = d => store.set('nut:day:' + d.date, d);
+const perfilDe = d => d.perfil || 'descanso';
+const guardiaDe = d => d.guardia ?? isGuardNight(d.date);
+
+function autoMeal(d) {
+  const now = new Date(), h = now.getHours() + now.getMinutes() / 60;
+  if (guardiaDe(d) && (h >= 22 || h < 7)) return 'Guardia';
+  if (h < 4) return 'Cena';
+  if (h < 11.5) return 'Desayuno';
+  if (h < 16.5) return 'Almuerzo';
+  if (h < 20) return 'Once';
+  return 'Cena';
+}
+
+let today = logicalDate();
+let day = loadDay(today);
+let meal = autoMeal(day);
+let tab = 'Básicos';
+let historial = store.get('nut:hist') || [];
+
+/* ================= Sincronización con Notion (vía Worker) ================= */
+let pending = new Set(store.get('nut:pending') || []);
+let syncTimer = null, flushing = false, flushAgain = false;
+
+function setSync(state, msg) {
+  const txt = {
+    ok: 'Sincronizado con Notion',
+    pending: 'Guardando…',
+    sync: 'Conectando…',
+    offline: 'Sin conexión · se enviará después',
+    local: 'Solo en este teléfono',
+    error: 'Error: ' + (msg || 'no se pudo sincronizar'),
+  }[state];
+  $('#syncDot').className = 'dot ' + state;
+  $('#syncTxt').textContent = txt;
+}
+
+async function api(method, path, body, conf = cfg) {
+  const res = await fetch(conf.workerUrl.replace(/\/+$/, '') + path, {
+    method,
+    headers: { 'Content-Type': 'application/json', 'X-App-Key': conf.appKey },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
+  return data;
+}
+
+function detalleDe(d) {
+  const por = {};
+  for (const e of d.log) (por[e.meal] = por[e.meal] || []).push(e.n);
+  return Object.entries(por).map(([m, ns]) => `${m}: ${ns.join(', ')}`).join(' · ');
+}
+
+function toFields(d) {
+  const pf = PERFILES[perfilDe(d)];
+  return {
+    perfil: pf.nombre, guardia: guardiaDe(d),
+    prot: r1(d.p), carb: r1(d.c), gras: r1(d.g),
+    metaP: pf.p, metaC: pf.c, metaG: pf.g,
+    peso: d.peso, sueno: d.sueno, agua: r2(d.agua), energia: d.energia,
+    detalle: detalleDe(d),
+  };
+}
+
+function markDirty(date) {
+  pending.add(date);
+  store.set('nut:pending', [...pending]);
+  if (!configured()) return setSync('local');
+  setSync('pending');
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(flush, 1200);
+}
+
+async function flush() {
+  if (!configured()) return setSync('local');
+  if (!navigator.onLine) return setSync('offline');
+  if (flushing) { flushAgain = true; return; }
+  flushing = true;
+  try {
+    for (const date of [...pending]) {
+      await api('POST', '/day', { date, fields: toFields(loadDay(date)) });
+      pending.delete(date);
+      store.set('nut:pending', [...pending]);
+    }
+    setSync('ok');
+  } catch (e) {
+    setSync(navigator.onLine ? 'error' : 'offline', e.message);
+  } finally {
+    flushing = false;
+    if (flushAgain) { flushAgain = false; flush(); }
+  }
+}
+
+async function hydrate(date) {
+  if (!configured() || pending.has(date)) return;
+  const r = await api('GET', `/day?date=${date}`);
+  if (!r.found || pending.has(date)) return;
+  const d = loadDay(date);
+  if (NOMBRE_A_KEY[r.perfil]) d.perfil = NOMBRE_A_KEY[r.perfil];
+  d.guardia = r.guardia;
+  d.p = r.prot ?? d.p; d.c = r.carb ?? d.c; d.g = r.gras ?? d.g;
+  d.peso = r.peso ?? d.peso; d.sueno = r.sueno ?? d.sueno;
+  d.agua = r.agua ?? d.agua; d.energia = r.energia ?? d.energia;
+  saveDay(d);
+}
+
+async function loadHistory() {
+  if (!configured()) return;
+  const r = await api('GET', '/history?days=14');
+  historial = (r.items || []).map(x => ({ date: x.date, peso: x.peso }));
+  store.set('nut:hist', historial);
+}
+
+/* ================= Acciones ================= */
+function commit(d = day) {
+  saveDay(d);
+  markDirty(d.date);
+  render();
+}
+
+function addEntry(it) {
+  const e = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    t: new Date().toTimeString().slice(0, 5),
+    meal, n: it.n,
+    p: r1(it.p || 0), c: r1(it.c || 0), g: r1(it.g || 0),
+  };
+  day.log.push(e);
+  day.p = r1(day.p + e.p); day.c = r1(day.c + e.c); day.g = r1(day.g + e.g);
+  commit();
+  buzz();
+  toast(`${it.n} · ${fmt(e.p, 1)}P ${fmt(e.c, 1)}C ${fmt(e.g, 1)}G`);
+}
+
+function removeEntry(e) {
+  day.log = day.log.filter(x => x.id !== e.id);
+  day.p = Math.max(0, r1(day.p - e.p));
+  day.c = Math.max(0, r1(day.c - e.c));
+  day.g = Math.max(0, r1(day.g - e.g));
+  commit();
+  buzz();
+}
+
+/* ================= Render ================= */
+function renderSeg(el, current, onPick) {
+  el.innerHTML = Object.entries(PERFILES).map(([k, v]) =>
+    `<button class="seg-b ${k === current ? 'on' : ''}" data-p="${k}" data-k="${k}">
+       <span class="seg-n">${v.corto}</span><span class="seg-m">${v.p}·${v.c}·${v.g}</span>
+     </button>`).join('');
+  el.onclick = ev => { const b = ev.target.closest('button'); if (b) onPick(b.dataset.k); };
+}
+
+function pesoStats() {
+  const map = Object.fromEntries(historial.filter(h => h.date).map(h => [h.date, h.peso]));
+  const valores = [];
+  for (let i = 0; i < 14; i++) {
+    const date = addDays(today, -i);
+    const local = store.get('nut:day:' + date);
+    valores.push(local && local.peso != null ? local.peso : (map[date] ?? null));
+  }
+  const avg = arr => { const v = arr.filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+  return {
+    avg7: avg(valores.slice(0, 7)),
+    prev7: avg(valores.slice(7, 14)),
+    ultimo: valores.slice(1).find(x => x != null) ?? null,
+  };
+}
+
+function render() {
+  const pf = PERFILES[perfilDe(day)];
+
+  // Encabezado
+  $('#hoyFecha').textContent = fechaLarga(today);
+  $('#btnGuardiaHoy').classList.toggle('on', guardiaDe(day));
+  $('#btnGuardiaHoy').textContent = guardiaDe(day) ? '🌙 Guardia esta noche' : '🌙 Sin guardia';
+  renderSeg($('#segHoy'), perfilDe(day), k => {
+    day.perfil = k; commit(); buzz(); toast(`Hoy: ${PERFILES[k].nombre}`);
+  });
+
+  // Macros
+  const meta = { p: pf.p, c: pf.c, g: pf.g };
+  const kcalMeta = pf.p * 4 + pf.c * 4 + pf.g * 9;
+  const kcal = day.p * 4 + day.c * 4 + day.g * 9;
+  const rest = kcalMeta - kcal;
+  $('#hero').classList.toggle('over', rest < 0);
+  $('#kcalRest').textContent = fmt(Math.abs(rest));
+  $('#kcalLbl').textContent = rest >= 0 ? 'kcal restantes' : 'kcal sobre la meta';
+  $('#kcalSub').textContent = `${fmt(kcal)} de ${fmt(kcalMeta)} kcal · perfil ${pf.nombre}`;
+  $('#bars').innerHTML = MACROS.map(m => {
+    const v = day[m.k], t = meta[m.k], falta = t - v;
+    return `<div class="bar-row ${m.k} ${falta < 0 ? 'excess' : ''}">
+      <div class="bar-top"><span class="bar-l">${m.label}</span><span class="bar-v"><b>${fmt(v)}</b> / ${t} g</span></div>
+      <div class="bar"><i style="width:${Math.min(100, (v / t) * 100)}%"></i></div>
+      <div class="bar-f">${falta >= 0 ? `faltan ${fmt(falta)} g` : `${fmt(-falta)} g sobre la meta`}</div>
+    </div>`;
+  }).join('');
+
+  // Comidas
+  $('#meals').innerHTML = COMIDAS.map(m => `<button class="chip ${m === meal ? 'on' : ''}" data-m="${m}">${m}</button>`).join('');
+
+  // Botones rápidos
+  $('#quick').innerHTML = MACROS.map(m =>
+    `<div class="q-row ${m.k}"><span class="q-l">${m.k.toUpperCase()}</span>${
+      m.steps.map(s => `<button class="q-b" data-k="${m.k}" data-v="${s}">+${s}</button>`).join('')}</div>`).join('');
+
+  // Alimentos
+  $('#tabs').innerHTML = Object.keys(PRESETS).map(t => `<button class="tab ${t === tab ? 'on' : ''}" data-t="${t}">${t}</button>`).join('');
+  $('#presets').innerHTML = PRESETS[tab].map((it, i) =>
+    `<button class="pre" data-i="${i}"><span class="pre-e">${it.e}</span><span class="pre-n">${esc(it.n)}</span>
+     <span class="pre-m">${fmt(it.p, 1)}·${fmt(it.c, 1)}·${fmt(it.g, 1)}</span></button>`).join('');
+  $('#presetHint').hidden = tab !== 'Alcohol';
+
+  // Registro del día
+  $('#logCount').textContent = day.log.length;
+  $('#logList').innerHTML = day.log.length
+    ? day.log.slice().reverse().map(e =>
+        `<li><span class="lt">${e.t}</span><span>${esc(e.n)}<small>${esc(e.meal)}</small></span>
+         <span class="lm">${fmt(e.p, 1)}·${fmt(e.c, 1)}·${fmt(e.g, 1)}</span>
+         <button class="del" data-id="${e.id}" aria-label="Eliminar">✕</button></li>`).join('')
+    : '<li class="empty">Aún no registras nada hoy.</li>';
+
+  // Check-in
+  const st = pesoStats();
+  const peso = $('#peso');
+  if (document.activeElement !== peso) peso.value = day.peso ?? '';
+  peso.placeholder = st.ultimo != null ? fmt(st.ultimo, 1) : '80';
+  let txtAvg = `Promedio 7 días: ${st.avg7 != null ? fmt(st.avg7, 1) + ' kg' : '—'}`;
+  if (st.avg7 != null && st.prev7 != null) {
+    const dif = st.avg7 - st.prev7;
+    txtAvg += ` (${dif > 0 ? '+' : ''}${fmt(dif, 1)})`;
+  }
+  $('#pesoAvg').textContent = txtAvg;
+  $('#sueno').textContent = day.sueno != null ? `${fmt(day.sueno, 1)} h` : '—';
+  $('#aguaTxt').innerHTML = `<b>${fmt(day.agua, 2)}</b> / ${fmt(pf.agua, 1)} L`;
+  $('#aguaBar').style.width = Math.min(100, (day.agua / pf.agua) * 100) + '%';
+  $('#energia').innerHTML = ENERGIA.map(([e, v]) =>
+    `<button class="en-b ${day.energia === v ? 'on' : ''}" data-v="${v}">${e}<small>${v}</small></button>`).join('');
+
+  // Mañana
+  const man = loadDay(addDays(today, 1));
+  renderSeg($('#segMan'), man.perfil, k => {
+    man.perfil = k; commit(man); buzz(); toast(`Mañana: ${PERFILES[k].nombre}`);
+  });
+  $('#btnGuardiaMan').classList.toggle('on', guardiaDe(man));
+  $('#btnGuardiaMan').textContent = guardiaDe(man) ? '🌙 Guardia' : '🌙 Libre';
+  $('#manHint').textContent = man.perfil
+    ? `Listo. A las 9:00 te llegará: ${PERFILES[man.perfil].nombre} · ${PERFILES[man.perfil].p}P / ${PERFILES[man.perfil].c}C / ${PERFILES[man.perfil].g}G.`
+    : 'Sin marcar: mañana quedará en Descanso. Márcalo antes de dormir.';
+}
+
+/* ================= Eventos ================= */
+$('#meals').onclick = ev => { const b = ev.target.closest('button'); if (!b) return; meal = b.dataset.m; render(); };
+
+$('#quick').onclick = ev => {
+  const b = ev.target.closest('button'); if (!b) return;
+  const k = b.dataset.k, v = Number(b.dataset.v);
+  const label = MACROS.find(m => m.k === k).label.toLowerCase();
+  addEntry({ n: `+${v} g ${label}`, p: k === 'p' ? v : 0, c: k === 'c' ? v : 0, g: k === 'g' ? v : 0 });
+};
+
+$('#tabs').onclick = ev => { const b = ev.target.closest('button'); if (!b) return; tab = b.dataset.t; render(); };
+$('#presets').onclick = ev => { const b = ev.target.closest('button'); if (!b) return; addEntry(PRESETS[tab][Number(b.dataset.i)]); };
+
+$('#btnManual').onclick = () => {
+  const num = id => { const v = parseFloat(String($(id).value).replace(',', '.')); return isFinite(v) && v > 0 ? v : 0; };
+  const p = num('#mP'), c = num('#mC'), g = num('#mG');
+  if (!p && !c && !g) return toast('Ingresa al menos un macro');
+  addEntry({ n: $('#mN').value.trim() || 'Manual', p, c, g });
+  ['#mP', '#mC', '#mG', '#mN'].forEach(id => { $(id).value = ''; });
+};
+
+$('#btnUndo').onclick = () => {
+  const e = day.log[day.log.length - 1];
+  if (!e) return toast('Nada que deshacer');
+  removeEntry(e);
+  toast(`Deshecho: ${e.n}`);
+};
+
+$('#logList').onclick = ev => {
+  const b = ev.target.closest('.del'); if (!b) return;
+  const e = day.log.find(x => x.id === b.dataset.id);
+  if (e) removeEntry(e);
+};
+
+$('#peso').onchange = ev => {
+  const v = parseFloat(String(ev.target.value).replace(',', '.'));
+  day.peso = isFinite(v) && v > 0 ? r1(v) : null;
+  commit();
+};
+
+document.querySelectorAll('[data-peso]').forEach(b => b.onclick = () => {
+  const base = day.peso ?? pesoStats().ultimo ?? 80;
+  day.peso = r1(base + Number(b.dataset.peso));
+  commit(); buzz();
+});
+
+document.querySelectorAll('[data-sueno]').forEach(b => b.onclick = () => {
+  const step = Number(b.dataset.sueno);
+  day.sueno = day.sueno == null ? 7 : Math.min(14, Math.max(0, r1(day.sueno + step)));
+  commit(); buzz();
+});
+
+document.querySelectorAll('[data-agua]').forEach(b => b.onclick = () => {
+  day.agua = Math.max(0, r2(day.agua + Number(b.dataset.agua)));
+  commit(); buzz();
+});
+
+$('#energia').onclick = ev => {
+  const b = ev.target.closest('button'); if (!b) return;
+  const v = Number(b.dataset.v);
+  day.energia = day.energia === v ? null : v;
+  commit(); buzz();
+};
+
+$('#btnGuardiaHoy').onclick = () => { day.guardia = !guardiaDe(day); meal = autoMeal(day); commit(); buzz(); };
+$('#btnGuardiaMan').onclick = () => {
+  const man = loadDay(addDays(today, 1));
+  man.guardia = !guardiaDe(man);
+  commit(man); buzz();
+};
+
+/* Ajustes */
+function openSheet() {
+  $('#fWorker').value = cfg.workerUrl;
+  $('#fKey').value = cfg.appKey;
+  $('#fGuard').value = cfg.guardStart;
+  $('#overlay').hidden = false;
+  $('#sheet').hidden = false;
+}
+function closeSheet() { $('#overlay').hidden = true; $('#sheet').hidden = true; }
+const formCfg = () => ({ workerUrl: $('#fWorker').value.trim(), appKey: $('#fKey').value.trim(), guardStart: $('#fGuard').value });
+
+$('#btnAjustes').onclick = openSheet;
+$('#btnCerrar').onclick = closeSheet;
+$('#overlay').onclick = closeSheet;
+
+$('#btnTest').onclick = async () => {
+  const c = formCfg();
+  if (!c.workerUrl || !c.appKey) return toast('Completa URL y clave');
+  try { await api('GET', `/day?date=${today}`, null, c); toast('✓ Conexión con Notion OK'); }
+  catch (e) { toast('✕ ' + e.message); }
+};
+
+$('#btnGuardar').onclick = () => {
+  cfg = formCfg();
+  store.set('nut:cfg', cfg);
+  store.set('nut:seen', true);
+  closeSheet();
+  toast('Ajustes guardados');
+  boot();
+};
+
+/* Ciclo de vida */
+function checkRollover() {
+  const t = logicalDate();
+  if (t === today) return false;
+  today = t; day = loadDay(today); meal = autoMeal(day);
+  return true;
+}
+
+async function boot() {
+  render();
+  if (!configured()) {
+    setSync('local');
+    if (!store.get('nut:seen')) { store.set('nut:seen', true); openSheet(); }
+    return;
+  }
+  setSync('sync');
+  try {
+    await Promise.all([hydrate(today), hydrate(addDays(today, 1)), loadHistory()]);
+    day = loadDay(today);
+    render();
+    if (pending.size) flush(); else setSync('ok');
+  } catch (e) {
+    setSync(navigator.onLine ? 'error' : 'offline', e.message);
+  }
+}
+
+window.addEventListener('online', flush);
+window.addEventListener('offline', () => setSync('offline'));
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  if (checkRollover()) boot();
+  else if (pending.size) flush();
+});
+setInterval(() => { if (pending.size && !flushing) flush(); }, 60000);
+
+boot();
+
+// Permite instalar la app y abrirla sin internet
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
